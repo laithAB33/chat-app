@@ -1,30 +1,35 @@
 import {OAuth2Client} from "google-auth-library";
 import {AppError} from "../utils/appError.js";
+import { asyncWrapper } from "./asyncWrapper.js";
 
-let verifyGoogleToken = (req, res, next) => {
+let verifyGoogleToken = asyncWrapper(async (req, res, next) => {
 
-    let client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    let client = new OAuth2Client(process.env.client_id);
 
     let {idToken} = req.body;
 
+    console.log(idToken);
+    console.log(process.env.client_id);
+
     if(!idToken) return next(new AppError("idToken is required", 400,"fail"));
 
-    client.verifyIdToken({
-        idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
-    })
-    .then((response) => {
+    let ticket = await client.verifyIdToken({
+        idToken,
+        audience: process.env.client_id,})
 
-        let {email_verified, name, email, sub } = response.payload;
+    let payload = ticket.getPayload();
 
-        req.user = {email_verified, name, email, googleId:sub};
-        
-        next();
-    })
-    .catch((error) => {
-        return next(new AppError("Invalid or expired token", 401,"fail"));
-    });
+    console.log(payload);
 
-}
+    let {email_verified, name, email, sub} = payload;
+
+    if(!email_verified) return next(new AppError("email is not verified", 400,"fail"));
+
+    req.user = {email_verified, name, email, googleId:sub};
+
+    next();
+    
+
+})
 
 export {verifyGoogleToken};
