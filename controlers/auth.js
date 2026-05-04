@@ -14,7 +14,6 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     {
         user = new User({
             googleId,
-            name,
             email,
             provider:["google"],
         });
