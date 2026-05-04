@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "dotenv/config"
 import Express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import {globalErrorHandler} from "./controlers/globalErrorHandler.js";
 import {authRoutes} from "./Routes/authRouter.js";
+
 
 let 
 app = Express(),
