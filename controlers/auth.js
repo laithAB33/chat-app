@@ -22,7 +22,7 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
         await user.save();
     }
 
-    let payload = {email:user.email,userId:user._id,userName:user.userName}
+    let payload = {email:user.email,userId:user._id}
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
@@ -50,7 +50,6 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     success: true ,status:"success",message: "user logged in successflly" ,
     data:{
             id:user._id,
-            userName:user.userName,
             accessToken
         }
     })
