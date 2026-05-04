@@ -8,6 +8,7 @@ let verifyGoogleToken = asyncWrapper(async (req, res, next) => {
 
     let {idToken} = req.body;
 
+
     console.log(idToken);
     console.log(process.env.client_id);
 
