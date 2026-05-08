@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/laithAB33/chat-app#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

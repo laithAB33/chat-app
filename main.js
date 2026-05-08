@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import {globalErrorHandler} from "./controlers/globalErrorHandler.js";
 import {authRoutes} from "./Routes/authRouter.js";
-
+import {userRoutes} from "./Routes/userRouter.js";
 
 let 
 app = Express(),
@@ -26,6 +26,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use(globalErrorHandler);
 
