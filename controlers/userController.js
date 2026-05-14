@@ -9,7 +9,7 @@ import { authentication } from '../utils/authentication.js';
 
 let register = asyncWrapper(async (req, res, next) => {
 
-    let {userName,password} = req.body;
+    let {userName,password,email,phoneNumber} = req.body;
 
     let checkOld = await User.findOne({userName});
 
@@ -29,7 +29,7 @@ let register = asyncWrapper(async (req, res, next) => {
     
         user.refreshToken = refreshToken;
     
-            await user.save();
+        await user.save();
     
         res.cookie("refreshToken",refreshToken,{
             maxAge:1000 * 60 * 60 *24 * 365 ,
