@@ -25,9 +25,6 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
-    user.refreshToken = refreshToken;
-    user.accessToken = accessToken;
-
     await user.save();
 
     res.cookie("refreshToken",refreshToken,{

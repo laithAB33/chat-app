@@ -46,12 +46,6 @@ const userSchema = new Schema({
         type: Date,
         default: Date.now 
     },
-    refreshToken:{
-        type: String,
-    },
-    accessToken:{
-        type:String,
-    },
     provider:{
         type:[String],
         required:[true,"you need to Determine the access provider"],

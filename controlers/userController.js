@@ -6,6 +6,7 @@ import { assignUser } from '../utils/assignObject.js';
 import { genrateToken } from '../utils/genrateToken.js';
 import { AppError } from '../utils/appError.js';
 import { authentication } from '../utils/authentication.js';
+import jwt from "jsonwebtoken";
 
 let register = asyncWrapper(async (req, res, next) => {
 
@@ -26,11 +27,7 @@ let register = asyncWrapper(async (req, res, next) => {
         let payload = {userId:user._id,userName:user.userName};
         const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
         const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
-    
-        user.refreshToken = refreshToken;
-    
-        await user.save();
-    
+            
         res.cookie("refreshToken",refreshToken,{
             maxAge:1000 * 60 * 60 *24 * 365 ,
             httpOnly:true,
@@ -69,8 +66,6 @@ let login = asyncWrapper(async(req, res, next) => {
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
-    oldUser.refreshToken = refreshToken;
-
     await oldUser.save();
 
     res.cookie("refreshToken",refreshToken,{
@@ -96,4 +91,47 @@ let login = asyncWrapper(async(req, res, next) => {
 
 })
 
-export {register, login};
+let refreshToken = asyncWrapper(async(req,res,next)=>{
+
+    if(!req.cookies?.refreshToken)
+        return next(new AppError("Unauthorized. Please login to access this resource",401,"fail"));
+    
+    let oldRefreshToken = req.cookies.refreshToken;
+
+    let decoded = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+    let foundUser = await User.findOne({_id:decoded.userId});
+    
+    if(!foundUser)
+        return next(new AppError("Unauthorized",401,"fail"));
+    
+    req.userID = decoded.userId;
+    req.email = decoded.email;
+    req.userName = decoded.userName;
+
+    let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName};
+    const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
+    const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
+
+    res.cookie("refreshToken",refreshToken,{
+        maxAge:1000 * 60 * 60 *24 * 365 ,
+        httpOnly:true,
+        secure : process.env.NODE_ENV == 'production',
+        samesite: 'strict',
+    })
+
+    res.cookie("accessToken",accessToken,{
+        maxAge:1000 * 60 * 30,
+        httpOnly:true,
+        secure : process.env.NODE_ENV == 'production',
+        samesite: 'strict',
+    })
+
+    res.status(200).json({success:true,status:"success",message:"the session is updated successfully",
+    data:{
+        accessToken
+    }});
+
+})
+
+export {register, login,refreshToken};

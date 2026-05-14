@@ -1,6 +1,7 @@
 import {OAuth2Client} from "google-auth-library";
 import {AppError} from "../utils/appError.js";
 import { asyncWrapper } from "./asyncWrapper.js";
+import jwt from "jsonwebtoken";
 
 let verifyGoogleToken = asyncWrapper(async (req, res, next) => {
 
@@ -27,4 +28,23 @@ let verifyGoogleToken = asyncWrapper(async (req, res, next) => {
 
 })
 
-export {verifyGoogleToken};
+let verifyToken = (req,res,next)=>{
+
+    let token = req.cookies?.accessToken;
+    let decoded;
+
+    try{
+        decoded = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+    }catch(err){
+
+            let error = new AppError("you need to sign up or sign in",401,"fail");
+            return next(error);
+    }    
+    req.userId = decoded.userID;
+    req.email = decoded.email;
+    req.userName = decoded.userName;
+    next();
+}
+
+
+export {verifyGoogleToken, verifyToken};
