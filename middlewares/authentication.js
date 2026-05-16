@@ -40,7 +40,7 @@ let verifyToken = (req,res,next)=>{
             let error = new AppError("you need to sign up or sign in",401,"fail");
             return next(error);
     }    
-    req.userId = decoded.userID;
+    req.userId = decoded.userId;
     req.email = decoded.email;
     req.userName = decoded.userName;
     next();

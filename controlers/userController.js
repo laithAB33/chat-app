@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 
 let register = asyncWrapper(async (req, res, next) => {
 
-    let {userName,password,email,phoneNumber} = req.body;
+    let {userName,password} = req.body;
 
     let checkOld = await User.findOne({userName});
 
@@ -134,4 +134,30 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
 
 })
 
-export {register, login,refreshToken};
+let update = asyncWrapper(async(req,res,next)=>{
+
+    let data = req.body,photo;
+
+    let user = await User.findOne({_id:req.userId});
+
+    if(!user) return next(new AppError("user not found",400,"fail"));
+
+    if(data.deleteImage == 'true')
+    {
+        if(user.profileImage.public_id)
+        await cloudinary.uploader.destroy(user.profileImage.public_id);
+        user.profileImage.url = null;
+        user.profileImage.public_id = null;
+    }
+    
+    if(data.email) user.email = data.email;
+    if(data.phoneNumber) user.phoneNumber = data.phoneNumber;
+
+    await user.save();
+
+    res.status(200).json({success:true,status:"success",message:"the user was updated",data:{userId:user._id,userName:user.userName,email:user.email,phoneNumber:user.phoneNumber,profileImage:user.profileImage}});
+
+})
+
+
+export {register, login,refreshToken,update};

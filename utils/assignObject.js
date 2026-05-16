@@ -7,8 +7,6 @@ let assignUser = (req,hashedPassword)=>{
     let newUser = new User({
         userName,
         password:hashedPassword,
-        email,
-        phoneNumber,
         provider:["userName"],
     })
 
