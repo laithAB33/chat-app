@@ -52,9 +52,9 @@ let register = asyncWrapper(async (req, res, next) => {
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let {userName,password} = req.body;
+    let userName = req.query.userName, password = req.query.password;
    
-    let oldUser = await User.findOne({userName,provider:"userName"});
+    let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
     if(!oldUser){
         return next(new AppError("invalid username or password",400,"fail"));

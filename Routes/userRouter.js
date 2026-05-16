@@ -5,9 +5,8 @@ import { verifyToken } from "../middlewares/authentication.js";
 
 let router = express.Router();
 
-router.route("/")
-                .post(upload.none(),register)
-                .get(upload.none(),login);
+router.route("/register").post(upload.none(),register);
+router.route("/login").get(upload.none(),login);
 
 router.route('/refresh').patch(verifyToken,refreshToken);
 
