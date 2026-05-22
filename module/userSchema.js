@@ -1,8 +1,17 @@
 import mongoose,{ Schema } from "mongoose";
 import validator from "validator";
+
 const {isEmail} = validator;
 
 const userSchema = new Schema({
+    firstName: {
+        type: String,
+        trim: true
+    },
+    lastName: {
+        type: String,
+        trim: true
+    },
     googleId: {
         type: String,
         unique: true,
@@ -21,16 +30,20 @@ const userSchema = new Schema({
             message: "this is not a valid email"
         },
         unique: [true, "invalid email or password"],
-        minLength: 15,
+        minLength: 12,
         sparse: true,
+        
     },
     password: {
         type: String,
+        select: false,
+        minLength: 8,
     },
     phoneNumber: {
         type: String,
         unique: [true, "allready used phone number"],
-        sparse: true
+        sparse: true,
+
     },
     profileImage: {
         url:{
@@ -66,6 +79,9 @@ const userSchema = new Schema({
 }, {
     timestamps: true
 });
+
+
+
 
 let User = mongoose.model('User', userSchema);
 

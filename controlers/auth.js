@@ -3,16 +3,21 @@ import { genrateToken } from "../utils/genrateToken.js";
 import {AppError} from "../utils/appError.js";
 import {asyncWrapper} from "../middlewares/asyncWrapper.js";
 
+
 let googleAuth = asyncWrapper(async(req, res,next) => {
     
     let { email, googleId} = req.user;
 
     let user = await User.findOne({googleId});
 
+
+
     if(!user)
     {
+        const newNumber = await incrementCounter(); 
+
         user = new User({
-            userName:email.split("@")[0],
+            userName: `#${newNumber}`,
             googleId,
             email,
             provider:["google"],

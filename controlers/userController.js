@@ -7,7 +7,8 @@ import { genrateToken } from '../utils/genrateToken.js';
 import { AppError } from '../utils/appError.js';
 import { authentication } from '../utils/authentication.js';
 import jwt from "jsonwebtoken";
-
+import { uploadToCloudinary } from '../utils/cloudinary.js';
+import { cloudinary } from '../utils/cloudinary.js';
 let register = asyncWrapper(async (req, res, next) => {
 
     let {userName,password} = req.body;
@@ -53,8 +54,10 @@ let register = asyncWrapper(async (req, res, next) => {
 let login = asyncWrapper(async(req, res, next) => {
 
     let userName = req.query.userName, password = req.query.password;
+
    
-    let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
+    let oldUser = await User.findOne({userName,provider:{$in:["userName"]}}).select("+password");
+
 
     if(!oldUser){
         return next(new AppError("invalid username or password",400,"fail"));
@@ -138,7 +141,7 @@ let update = asyncWrapper(async(req,res,next)=>{
 
     let data = req.body,photo;
 
-    let user = await User.findOne({_id:req.userId});
+    let user = await User.findOne({_id:req.userId}).select("+email +phoneNumber");
 
     if(!user) return next(new AppError("user not found",400,"fail"));
 
@@ -152,12 +155,44 @@ let update = asyncWrapper(async(req,res,next)=>{
     
     if(data.email) user.email = data.email;
     if(data.phoneNumber) user.phoneNumber = data.phoneNumber;
+    if(data.firstName) user.firstName = data.firstName;
+    if(data.lastName) user.lastName = data.lastName;
 
     await user.save();
 
-    res.status(200).json({success:true,status:"success",message:"the user was updated",data:{userId:user._id,userName:user.userName,email:user.email,phoneNumber:user.phoneNumber,profileImage:user.profileImage}});
+    res.status(200).json({success:true,status:"success",message:"the user was updated",data:{userId:user._id,userName:user.userName,email:user.email,phoneNumber:user.phoneNumber,profileImage:user.profileImage,firstName:user.firstName,lastName:user.lastName}});
 
 })
 
+let addAvatar = asyncWrapper(async(req,res,next)=>{
 
-export {register, login,refreshToken,update};
+    if(!req.file) return next(new AppError("Please provide a picture of the item",400,"fail"));
+
+    let photo;
+
+    try{ photo = await uploadToCloudinary(req) }
+    catch(err)
+    {
+        return next(new AppError("error uploading image",500,"error"));
+    }
+
+    let user = await User.findOneAndUpdate({_id:req.userId},{
+        profileImage: {
+            url:photo.url,
+            public_id:photo.public_id,  
+    }})
+
+    if(!user) return next(new AppError("user not found",400,"fail"));
+
+    let profileImage = user.profileImage;
+    if(profileImage?.public_id)await cloudinary.uploader.destroy(profileImage.public_id);
+
+    res.status(200).json({success:true, status:"success", message:"added a profileImage",
+    data:{
+        userId:req.userId,
+        imageURL:photo.url
+    }})
+
+})
+
+export {register, login,refreshToken,update,addAvatar};
