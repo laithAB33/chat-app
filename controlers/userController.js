@@ -164,35 +164,35 @@ let update = asyncWrapper(async(req,res,next)=>{
 
 })
 
-// let addAvatar = asyncWrapper(async(req,res,next)=>{
+let addAvatar = asyncWrapper(async(req,res,next)=>{
 
-//     if(!req.file) return next(new AppError("Please provide a picture of the item",400,"fail"));
+    if(!req.file) return next(new AppError("Please provide a picture of the item",400,"fail"));
 
-//     let photo;
+    let photo;
 
-//     try{ photo = await uploadToCloudinary(req) }
-//     catch(err)
-//     {
-//         return next(new AppError("error uploading image",500,"error"));
-//     }
+    try{ photo = await uploadToCloudinary(req) }
+    catch(err)
+    {
+        return next(new AppError("error uploading image",500,"error"));
+    }
 
-//     let user = await User.findOneAndUpdate({_id:req.userId},{
-//         profileImage: {
-//             url:photo.url,
-//             public_id:photo.public_id,  
-//     }})
+    let user = await User.findOneAndUpdate({_id:req.userId},{
+        profileImage: {
+            url:photo.url,
+            public_id:photo.public_id,  
+    }})
 
-//     if(!user) return next(new AppError("user not found",400,"fail"));
+    if(!user) return next(new AppError("user not found",400,"fail"));
 
-//     let profileImage = user.profileImage;
-//     if(profileImage?.public_id)await cloudinary.uploader.destroy(profileImage.public_id);
+    let profileImage = user.profileImage;
+    if(profileImage?.public_id)await cloudinary.uploader.destroy(profileImage.public_id);
 
-//     res.status(200).json({success:true, status:"success", message:"added a profileImage",
-//     data:{
-//         userId:req.userId,
-//         imageURL:photo.url
-//     }})
+    res.status(200).json({success:true, status:"success", message:"added a profileImage",
+    data:{
+        userId:req.userId,
+        imageURL:photo.url
+    }})
 
-// })
+})
 
 export {register, login,refreshToken,update,addAvatar};

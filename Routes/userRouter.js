@@ -15,6 +15,6 @@ router.route('/refresh').patch(verifyToken,refreshToken);
 
 router.route('/').patch(verifyToken,upload.single('image'),userUpdateValidate,update);
 
-// router.route('/avatar').post(verifyToken,upload.single('image'),addAvatar);
+router.route('/avatar').post(verifyToken,upload.single('image'),addAvatar);
 
 export {router as userRoutes};
