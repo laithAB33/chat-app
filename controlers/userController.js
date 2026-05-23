@@ -229,6 +229,8 @@ let changePrivacySettings = asyncWrapper(async(req,res,next)=>{
     if(profileImage) user.privacySettings.profileImage = profileImage;
     if(lastSeen) user.privacySettings.lastSeen = lastSeen;
 
+    await user.save();
+
     res.status(200).json({success:true, status:"success", message:"updated privacy settings",
     data:{
         userId:req.userId,
