@@ -45,4 +45,27 @@ let userRegisterValidate = asyncWrapper(async(req,res,next)=>{
     next();
 })
 
-export {userUpdateValidate, userRegisterValidate};
+let userUpdatePrivacySettingsValidate = asyncWrapper(async(req,res,next)=>{
+
+    let data = req.body;
+
+    if(data.firstName && (data.firstName !== 'true'  && data.firstName !== "false") ) return next(new AppError("firstName must be true or false",400,"fail"));
+
+    if(data.lastName && (data.lastName != "true"  && data.lastName != "false") ) return next(new AppError("lastName must be true or false",400,"fail"));
+
+    if(data.phoneNumber && (data.phoneNumber != "true"  && data.phoneNumber != "false") ) return next(new AppError("phoneNumber must be true or false",400,"fail"));
+
+    if(data.email && (data.email != "true"  && data.email != "false") ) return next(new AppError("email must be true or false",400,"fail"));
+
+    if(data.userName && (data.userName != "true"  && data.userName != "false") ) return next(new AppError("userName must be true or false",400,"fail"));
+
+    if(data.profileImage && (data.profileImage != "true"  && data.profileImage != "false") ) return next(new AppError("profileImage must be true or false",400,"fail"));
+
+    if(data.lastSeen && (data.lastSeen != "true"  && data.lastSeen != "false") ) return next(new AppError("lastSeen must be true or false",400,"fail"));
+
+    console.log(222);
+    
+    next();
+})
+
+export {userUpdateValidate, userRegisterValidate,userUpdatePrivacySettingsValidate};

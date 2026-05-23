@@ -26,7 +26,7 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
         await user.save();
     }
 
-    let payload = {email:user.email,userId:user._id}
+    let payload = {email:user.email,userId:user._id,userName:user.userName}
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 

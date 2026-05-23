@@ -9,6 +9,7 @@ import { authentication } from '../utils/authentication.js';
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { cloudinary } from '../utils/cloudinary.js';
+
 let register = asyncWrapper(async (req, res, next) => {
 
     let {userName,password} = req.body;
@@ -45,9 +46,8 @@ let register = asyncWrapper(async (req, res, next) => {
     
         res.status(201).json({success: true ,status:"success",message: "user created successflly" ,
         data:{
-            id:user._id,
-            userName:user.userName,
-            accessToken
+            user:user.getMyData(),
+            accessToken,
         }});
 })
 
@@ -55,9 +55,7 @@ let login = asyncWrapper(async(req, res, next) => {
 
     let userName = req.query.userName, password = req.query.password;
 
-   
-    let oldUser = await User.findOne({userName,provider:{$in:["userName"]}}).select("+password");
-
+    let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
     if(!oldUser){
         return next(new AppError("invalid username or password",400,"fail"));
@@ -87,9 +85,8 @@ let login = asyncWrapper(async(req, res, next) => {
 
     res.status(200).json({success: true ,status:"success",message: "user logged in successflly" ,
     data:{
-        id:oldUser._id,
-        userName:oldUser.userName,
-        accessToken
+        user:oldUser.getMyData(),
+        accessToken,
     }})
 
 })
@@ -132,7 +129,8 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
 
     res.status(200).json({success:true,status:"success",message:"the session is updated successfully",
     data:{
-        accessToken
+        user:foundUser.getMyData(),
+        accessToken,
     }});
 
 })
@@ -141,7 +139,7 @@ let update = asyncWrapper(async(req,res,next)=>{
 
     let data = req.body,photo;
 
-    let user = await User.findOne({_id:req.userId}).select("+email +phoneNumber");
+    let user = await User.findOne({_id:req.userId});
 
     if(!user) return next(new AppError("user not found",400,"fail"));
 
@@ -160,7 +158,10 @@ let update = asyncWrapper(async(req,res,next)=>{
 
     await user.save();
 
-    res.status(200).json({success:true,status:"success",message:"the user was updated",data:{userId:user._id,userName:user.userName,email:user.email,phoneNumber:user.phoneNumber,profileImage:user.profileImage,firstName:user.firstName,lastName:user.lastName}});
+    res.status(200).json({success:true,status:"success",message:"the user was updated",
+        data:{
+            user:user.getMyData(),
+        }});
 
 })
 
@@ -195,4 +196,45 @@ let addAvatar = asyncWrapper(async(req,res,next)=>{
 
 })
 
-export {register, login,refreshToken,update,addAvatar};
+let searchUser = asyncWrapper(async(req,res,next)=>{
+
+    let {userId} = req.query;
+
+    if(!userId) return next(new AppError("userId is missing",400,"fail"));
+
+    let user = await User.findById(userId);
+
+    if(!user) return next(new AppError("user with this id not found",404,"fail"));
+
+    res.json({success:true, status:"success", message:"user info",
+    data:{
+        user:user.getUserData(),
+    }});
+
+})
+
+let changePrivacySettings = asyncWrapper(async(req,res,next)=>{
+
+    let {firstName,lastName,phoneNumber,email,userName,profileImage,lastSeen} = req.body;
+
+    let user = await User.findById(req.userId);
+
+    if(!user) return next(new AppError("user not found",400,"fail"));
+
+    if(firstName) user.privacySettings.firstName = firstName;
+    if(lastName) user.privacySettings.lastName = lastName;
+    if(phoneNumber) user.privacySettings.phoneNumber = phoneNumber;
+    if(email) user.privacySettings.email = email;
+    if(userName) user.privacySettings.userName = userName;
+    if(profileImage) user.privacySettings.profileImage = profileImage;
+    if(lastSeen) user.privacySettings.lastSeen = lastSeen;
+
+    res.status(200).json({success:true, status:"success", message:"updated privacy settings",
+    data:{
+        userId:req.userId,
+        privacySettings:user.privacySettings,
+    }});
+
+});
+
+export {register, login,refreshToken,update,addAvatar,searchUser,changePrivacySettings};
