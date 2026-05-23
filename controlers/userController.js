@@ -198,11 +198,11 @@ let addAvatar = asyncWrapper(async(req,res,next)=>{
 
 let searchUser = asyncWrapper(async(req,res,next)=>{
 
-    let {userId} = req.query;
+    let {userName} = req.query;
 
-    if(!userId) return next(new AppError("userId is missing",400,"fail"));
+    if(!userName) return next(new AppError("userNameis missing",400,"fail"));
 
-    let user = await User.findById(userId);
+    let user = await User.findOne({userName});
 
     if(!user) return next(new AppError("user with this id not found",404,"fail"));
 
