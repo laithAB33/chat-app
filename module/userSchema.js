@@ -106,7 +106,7 @@ const userSchema = new Schema({
         },
         userName: {
             type: Boolean,
-            default: false
+            default: true,
         },
         lastSeen: {
             type: Boolean,

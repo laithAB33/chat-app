@@ -204,7 +204,7 @@ let searchUser = asyncWrapper(async(req,res,next)=>{
 
     let user = await User.findOne({userName});
 
-    if(!user) return next(new AppError("user with this id not found",404,"fail"));
+    if(!user) return next(new AppError("user with this userName not found",404,"fail"));
 
     res.json({success:true, status:"success", message:"user info",
     data:{
