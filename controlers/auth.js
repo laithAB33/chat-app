@@ -2,7 +2,7 @@ import {User} from "../module/userSchema.js";
 import { genrateToken } from "../utils/genrateToken.js";
 import {AppError} from "../utils/appError.js";
 import {asyncWrapper} from "../middlewares/asyncWrapper.js";
-
+import { incrementCounter } from "../module/counter.js";
 
 let googleAuth = asyncWrapper(async(req, res,next) => {
     
