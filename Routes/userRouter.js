@@ -11,7 +11,7 @@ router.route("/register").post(upload.none(),userRegisterValidate,register);
 
 router.route("/login").get(upload.none(),login);
 
-router.route('/refresh').patch(verifyToken,refreshToken);
+router.route('/refresh').patch(refreshToken);
 
 router.route('/').patch(verifyToken,upload.single('image'),userUpdateValidate,update)
                  .get(verifyToken,searchUser);
