@@ -49,8 +49,8 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     res.status(200).json({
     success: true ,status:"success",message: "user logged in successflly" ,
     data:{
-            id:user._id,
-            accessToken
+            user:user.getMyData(),
+            accessToken,
         }
     })    
     
