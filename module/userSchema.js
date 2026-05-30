@@ -23,7 +23,6 @@ const userSchema = new Schema({
         unique: [true, "allready used username"],
         trim: true,
         sparse: true,
-    
     },
     email: {
         type: String,

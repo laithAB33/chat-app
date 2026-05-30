@@ -9,7 +9,7 @@ import { authentication } from '../utils/authentication.js';
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { cloudinary } from '../utils/cloudinary.js';
-
+import { Decode } from '../utils/percentEncoding.js';
 let register = asyncWrapper(async (req, res, next) => {
 
     let {userName,password} = req.body;
@@ -53,7 +53,7 @@ let register = asyncWrapper(async (req, res, next) => {
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let userName = req.params.userName, password = req.params.password;
+    let userName = Decode(req.params.userName), password = Decode(req.params.password);
 
     let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
