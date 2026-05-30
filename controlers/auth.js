@@ -1,8 +1,11 @@
 import {User} from "../module/userSchema.js";
 import { genrateToken } from "../utils/genrateToken.js";
 import {AppError} from "../utils/appError.js";
-import {asyncWrapper} from "../middlewares/asyncWrapper.js";
+import {asyncWrapper, socketAuthWrapper} from "../middlewares/asyncWrapper.js";
 import { incrementCounter } from "../module/counter.js";
+import jwt from "jsonwebtoken";
+import { extractTokenFromSocket } from "../utils/extractToken.js";
+
 
 let googleAuth = asyncWrapper(async(req, res,next) => {
     
@@ -56,4 +59,37 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     
 })
 
-export {googleAuth};
+let socketAuth = socketAuthWrapper(async (socket, next) => {
+
+    const token = extractTokenFromSocket(socket);
+
+    if(!token)
+        throw new AppError("you need to login",401,"fail");
+ 
+    let decoded;
+    
+    try
+    {
+        decoded = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+    }
+    catch(err)
+    {
+        throw new AppError("you need to login",401,"fail");
+    }
+    
+    let user = await User.findById(decoded.userId);
+
+    if(!user)
+    {
+        throw new AppError("Unauthorized",401,"fail")
+    }
+
+    socket.userId = user._id;
+    socket.userName = user.userName;
+    socket.profileImage = user.profileImage.url;
+
+    next();
+
+})
+
+export {googleAuth, socketAuth};

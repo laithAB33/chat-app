@@ -53,7 +53,7 @@ let register = asyncWrapper(async (req, res, next) => {
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let userName = req.query.userName, password = req.query.password;
+    let userName = req.params.userName, password = req.params.password;
 
     let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 

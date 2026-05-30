@@ -7,10 +7,23 @@ import bodyParser from "body-parser";
 import {globalErrorHandler} from "./controlers/globalErrorHandler.js";
 import {authRoutes} from "./Routes/authRouter.js";
 import {userRoutes} from "./Routes/userRouter.js";
+import {createServer} from "http";
+import { Server } from 'socket.io';
 
 let 
 app = Express(),
-PORT = process.env.Port;
+PORT = process.env.Port,
+httpServer = createServer(app),
+io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        credentials: true,
+        allowedHeaders:["content-Type"],
+        },
+    transports: ['websocket', 'polling']
+});
+
+export {io};
 
 mongoose.connect(process.env.MONGODB_CONNECT_STR)
 .then(()=>{
@@ -27,6 +40,9 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+
+
+// io.use(socketAuth);
 
 app.use(globalErrorHandler);
 
