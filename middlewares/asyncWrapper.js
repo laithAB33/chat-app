@@ -9,7 +9,7 @@ function asyncWrapper(fn){
     }
 }
 
-function socketAuthWrapper(fn) {
+function socketWrapper(fn) {
     return async (socket,...args) => {        
         try {
             await fn(socket,...args);
@@ -30,13 +30,13 @@ function socketAuthWrapper(fn) {
     };
 }
 
-function socketWrapper(socket,fn) {
+function socketControllerWrapper(socket,fn) {
     return async (...args) => {        
         try {
             await fn(...args);
         } catch (err) {
 
-            if(process.env.NODE_ENV  == 'development')
+            // if(process.env.NODE_ENV  == 'development')
                     console.error('Socket Error:', {
                         user: socket.username,
                         error: err.message
@@ -54,4 +54,4 @@ function socketWrapper(socket,fn) {
 
 
 
-export {asyncWrapper,socketWrapper,socketAuthWrapper};
+export {asyncWrapper,socketWrapper,socketControllerWrapper};

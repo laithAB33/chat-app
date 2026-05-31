@@ -1,6 +1,6 @@
 import express from "express";
 import { upload } from "../middlewares/multer.js";
-import {register,login,refreshToken,update,addAvatar, searchUser, changePrivacySettings} from "../controlers/userController.js";
+import {register,login,refreshToken,update,addAvatar, searchUser, changePrivacySettings} from "../controllers/userController.js";
 import { verifyToken } from "../middlewares/authentication.js";
 import { userUpdateValidate, userRegisterValidate, userUpdatePrivacySettingsValidate } from "../middlewares/validate.js";
 

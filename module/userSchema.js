@@ -112,6 +112,10 @@ const userSchema = new Schema({
             default: true
         },
 
+    },
+    socketId:{
+        type:String,
+        default:null,
     }
 
 }, {

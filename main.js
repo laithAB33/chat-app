@@ -4,11 +4,13 @@ import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import {globalErrorHandler} from "./controlers/globalErrorHandler.js";
+import {globalErrorHandler} from "./controllers/globalErrorHandler.js";
 import {authRoutes} from "./Routes/authRouter.js";
 import {userRoutes} from "./Routes/userRouter.js";
 import {createServer} from "http";
 import { Server } from 'socket.io';
+import { socketAuth } from "./controllers/auth.js";
+import { socketHandler } from "./socket/socketHandler.js";
 
 let 
 app = Express(),
@@ -42,7 +44,9 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 
 
-// io.use(socketAuth);
+io.use(socketAuth);
+
+io.on('connection',socketHandler);
 
 app.use(globalErrorHandler);
 
@@ -56,7 +60,7 @@ app.use((req,res)=> {
 })
 
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 

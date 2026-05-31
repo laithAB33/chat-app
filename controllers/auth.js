@@ -1,7 +1,7 @@
 import {User} from "../module/userSchema.js";
 import { genrateToken } from "../utils/genrateToken.js";
 import {AppError} from "../utils/appError.js";
-import {asyncWrapper, socketAuthWrapper} from "../middlewares/asyncWrapper.js";
+import {asyncWrapper, socketWrapper} from "../middlewares/asyncWrapper.js";
 import { incrementCounter } from "../module/counter.js";
 import jwt from "jsonwebtoken";
 import { extractTokenFromSocket } from "../utils/extractToken.js";
@@ -59,7 +59,7 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     
 })
 
-let socketAuth = socketAuthWrapper(async (socket, next) => {
+let socketAuth = socketWrapper(async (socket, next) => {
 
     const token = extractTokenFromSocket(socket);
 

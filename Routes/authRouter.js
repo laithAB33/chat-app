@@ -1,6 +1,6 @@
 import express from "express";
 import {verifyGoogleToken} from "../middlewares/authentication.js";
-import {googleAuth} from "../controlers/auth.js";
+import {googleAuth} from "../controllers/auth.js";
 import {upload} from "../middlewares/multer.js";
 
 let router = express.Router();
