@@ -13,8 +13,6 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
 
     let user = await User.findOne({googleId});
 
-
-
     if(!user)
     {
         const newNumber = await incrementCounter(); 
@@ -32,8 +30,6 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
     let payload = {email:user.email,userId:user._id,userName:user.userName}
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
-
-    await user.save();
 
     res.cookie("refreshToken",refreshToken,{
         maxAge:1000 * 60 * 60 *24 * 365 ,
