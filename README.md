@@ -2,6 +2,6 @@
 
 | العملية | الحدث (Event) | البيانات المرسلة | البيانات المستقبلة |
 |---------|---------------|------------------|-------------------|
-| إرسال رسالة | sendMessage | message, receiverId | - |
-| تأكيد الإرسال | messageSent | - | message, senderId, receiverId, createdAt |
-| استقبال رسالة جديدة | newMessage | - | message, senderId, receiverId, createdAt |
+| إرسال رسالة | sendMessage | message, receiverUserName | - |
+| تأكيد الإرسال | messageSent | - | message, senderUserName, receiverUserName createdAt |
+| استقبال رسالة جديدة | newMessage | - | message, senderUserName, receiverUserName, createdAt |
