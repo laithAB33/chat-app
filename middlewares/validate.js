@@ -29,6 +29,14 @@ let userUpdateValidate = asyncWrapper(async(req,res,next)=>{
 
     if(data.lastName && typeof data.lastName !== "string") return next(new AppError("lastName must be a string",400,"fail"));
 
+    if(data.userName && typeof data.userName !== "string") return next(new AppError("userName must be a string",400,"fail"));
+
+    if(data.userName && data.userName[0] == "#") return next(new AppError("userName must not start with #",400,"fail"));
+
+    let user = await User.findOne({userName:data.userName});
+
+    if(user) return next(new AppError("user with this userName already exists",400,"fail"));
+
     next();
 })
 

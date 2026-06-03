@@ -9,7 +9,7 @@ let router = express.Router();
 
 router.route("/register").post(upload.none(),userRegisterValidate,register);
 
-router.route("/login/:userName/:password").get(upload.none(),login);
+router.route("/login").post(upload.none(),login);
 
 router.route('/refresh').patch(refreshToken);
 

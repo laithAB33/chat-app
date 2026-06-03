@@ -124,6 +124,7 @@ const userSchema = new Schema({
 
 userSchema.methods.getMyData = function(){
     return {
+        userId: this._id,
         firstName: this.firstName,
         lastName: this.lastName,
         userName: this.userName,
@@ -137,6 +138,7 @@ userSchema.methods.getMyData = function(){
 
 userSchema.methods.getUserData = function(){
     return {
+        userId: this._id,
         firstName: this.privacySettings.firstName ? this.firstName : null,
         lastName: this.privacySettings.lastName ? this.lastName : null,
         userName: this.privacySettings.userName ? this.userName : null,

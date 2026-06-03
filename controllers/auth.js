@@ -2,7 +2,6 @@ import {User} from "../module/userSchema.js";
 import { genrateToken } from "../utils/genrateToken.js";
 import {AppError} from "../utils/appError.js";
 import {asyncWrapper, socketWrapper} from "../middlewares/asyncWrapper.js";
-import { incrementCounter } from "../module/counter.js";
 import jwt from "jsonwebtoken";
 import { extractTokenFromSocket } from "../utils/extractToken.js";
 
@@ -15,10 +14,9 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
 
     if(!user)
     {
-        const newNumber = await incrementCounter(); 
 
         user = new User({
-            userName: `#${newNumber}`,
+            userName: `#${email.split("@")[0]}`,
             googleId,
             email,
             provider:["google"],

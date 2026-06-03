@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { cloudinary } from '../utils/cloudinary.js';
 import { Decode } from '../utils/percentEncoding.js';
+
 let register = asyncWrapper(async (req, res, next) => {
 
     let {userName,password} = req.body;
@@ -53,7 +54,7 @@ let register = asyncWrapper(async (req, res, next) => {
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let userName = Decode(req.params.userName), password = Decode(req.params.password);
+    let userName = req.body.userName, password = req.body.password;
 
     let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
@@ -155,6 +156,7 @@ let update = asyncWrapper(async(req,res,next)=>{
     if(data.phoneNumber) user.phoneNumber = data.phoneNumber;
     if(data.firstName) user.firstName = data.firstName;
     if(data.lastName) user.lastName = data.lastName;
+    if(data.userName) user.userName = data.userName;
 
     await user.save();
 
