@@ -11,6 +11,8 @@ import {createServer} from "http";
 import { Server } from 'socket.io';
 import { socketAuth } from "./controllers/auth.js";
 import { socketHandler } from "./socket/socketHandler.js";
+import { router as messageRoutes} from "./Routes/messageRouter.js";
+import { redis } from "./utils/redis.js";
 
 let 
 app = Express(),
@@ -24,6 +26,11 @@ io = new Server(httpServer, {
         },
     transports: ['websocket', 'polling']
 });
+
+await redis.connect();
+
+redis.on('error', (err) => console.error('Redis Error:', err));
+redis.on('connect', () => console.log('✅ Connected to Redis'));
 
 export {io};
 
@@ -42,7 +49,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
-
+app.use("/api/v1/messages", messageRoutes);
 
 io.use(socketAuth);
 

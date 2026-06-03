@@ -3,41 +3,42 @@ import {User} from "../module/userSchema.js";
 import {AppError} from "../utils/appError.js";
 import { PrivateMessage } from "../module/messageSchema.js";
 import {io} from "../main.js";
+import { redis } from "../utils/redis.js";
 
 let  sendMessage = (socket)=> socketControllerWrapper(socket,async(data)=>{
 
-    let {message,receiverUserName} = data;
+    let {message,receiverId} = data;
 
-    console.log(message,receiverUserName);
+    let senderId = socket.userId, delivered = true;
 
-    let senderUserName = socket.userName;
+    if(!message || !receiverId) throw new AppError("message and receiverId are required",400,"fail");
 
-    if(!message || !receiverUserName) throw new AppError("message and receiverUserName are required",400,"fail");
+    if(String(senderId) == String(receiverId)) throw new AppError("you can't send message to yourself",400,"fail");
 
-    if(String(senderUserName) == String(receiverUserName)) throw new AppError("you can't send message to yourself",400,"fail");
+    let receiverSocketId = await redis.get(`socketId:${receiverId}`);
 
-    let receiver = await User.findOne({userName: receiverUserName});
+    if(!receiverSocketId) delivered = false;
 
-    if(!receiver) throw new AppError("receiver not found",404,"fail");
-
-    let privateMessage = new PrivateMessage({senderUserName,receiverUserName,message});
+    let privateMessage = new PrivateMessage({senderId,receiverId,message,delivered});
     
     await privateMessage.save();
 
     socket.emit("messageSent",{
         message:privateMessage.message,
-        senderUserName,
-        receiverUserName,
+        senderId,
+        receiverId,
         createdAt:privateMessage.createdAt,
+        delivered
     })
 
-    io.to(receiver.socketId).emit("newMessage",{
+    if(!receiverSocketId) return;
+
+    io.to(receiverSocketId).emit("newMessage",{
         message:privateMessage.message,
-        senderUserName,
-        receiverUserName,
+        senderId,
+        receiverId,
         createdAt:privateMessage.createdAt,
     })
-
 })
 
 

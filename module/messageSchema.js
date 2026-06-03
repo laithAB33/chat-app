@@ -1,12 +1,12 @@
 import mongoose,{Schema} from "mongoose";
 
 const privateMessageSchema = new Schema({
-    senderUserName: {
+    senderId: {
         type: String,
         ref: 'User',
         required: true
     },
-    receiverUserName: {
+    receiverId: {
         type: String,
         ref: 'User',
         required: true
