@@ -8,7 +8,7 @@ import { extractTokenFromSocket } from "../utils/extractToken.js";
 
 let googleAuth = asyncWrapper(async(req, res,next) => {
     
-    let { email, googleId} = req.user;
+    let { email, googleId} = req.user, {deviceToken} = req.body;
 
     let user = await User.findOne({googleId});
 
@@ -22,10 +22,15 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
             provider:["google"],
         });
 
-        await user.save();
     }
 
-    let payload = {email:user.email,userId:user._id,userName:user.userName}
+    user.deviceToken = deviceToken;
+
+    user.tokenVersion += 1;
+
+    await user.save();
+
+    let payload = {email:user.email,userId:user._id,userName:user.userName,tokenVersion:user.tokenVersion};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 

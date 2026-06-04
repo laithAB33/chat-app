@@ -25,9 +25,11 @@ let register = asyncWrapper(async (req, res, next) => {
 
     let user = assignUser(req,hashedPassword);
 
-        await user.save();
+    user.tokenVersion += 1;
 
-        let payload = {userId:user._id,userName:user.userName};
+    await user.save();
+
+        let payload = {userId:user._id,userName:user.userName,tokenVersion:user.tokenVersion};
         const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
         const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
             
@@ -54,7 +56,7 @@ let register = asyncWrapper(async (req, res, next) => {
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let userName = req.body.userName, password = req.body.password;
+    let {userName,password,deviceToken} = req.body;
 
     let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
@@ -64,7 +66,12 @@ let login = asyncWrapper(async(req, res, next) => {
 
     await authentication(password,oldUser.password);
 
-    let payload = {userId:oldUser._id,userName:oldUser.userName};
+    oldUser.tokenVersion += 1;
+    oldUser.deviceToken = deviceToken;
+
+    await oldUser.save();
+
+    let payload = {userId:oldUser._id,userName:oldUser.userName,tokenVersion:oldUser.tokenVersion};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
@@ -105,12 +112,18 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
     
     if(!foundUser)
         return next(new AppError("Unauthorized",401,"fail"));
-    
+
+    if(foundUser.tokenVersion !== decoded.tokenVersion) return next(new AppError("Unauthorized expired token",401,"fail"));
+
     req.userID = decoded.userId;
     req.email = decoded.email;
     req.userName = decoded.userName;
 
-    let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName};
+    foundUser.tokenVersion += 1;
+
+    await foundUser.save();
+
+    let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName,tokenVersion:foundUser.tokenVersion};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
@@ -241,4 +254,34 @@ let changePrivacySettings = asyncWrapper(async(req,res,next)=>{
 
 });
 
-export {register, login,refreshToken,update,addAvatar,searchUser,changePrivacySettings};
+let logout = asyncWrapper(async(req,res,next)=>{
+
+    if(!req.cookies?.refreshToken){
+        return res.status(200).json({success:true, status:"success", message:"you already logout", data:null})
+    }
+
+    const refreshToken = req.cookies.refreshToken;
+
+
+        let decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+        if(!decoded) return next(new AppError("invalid refresh token",400,"fail"));
+
+        let user = await User.findById(decoded.userId);
+
+        if(!user) return next(new AppError("user not found",400,"fail"));
+
+        if(user.tokenVersion !== decoded.tokenVersion) return next(new AppError("Unauthorized expired token",401,"fail"));
+
+        user.tokenVersion += 1;
+
+        await user.save();
+
+    // res.clearCookie("refreshToken",{httpOnly:true})
+    // res.clearCookie("accessToken",{httpOnly:true})
+
+    res.status(200).json({success:true, status:"success", message:"you logged out", data:null})
+
+})
+
+export {register, login,refreshToken,update,addAvatar,searchUser,changePrivacySettings,logout};

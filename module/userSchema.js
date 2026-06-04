@@ -113,11 +113,14 @@ const userSchema = new Schema({
         },
 
     },
-    socketId:{
+    tokenVersion:{
+        type:Number,
+        default:0,
+    },
+    deviceToken:{
         type:String,
         default:null,
     }
-
 }, {
     timestamps: true
 });
@@ -132,7 +135,8 @@ userSchema.methods.getMyData = function(){
         phoneNumber: this.phoneNumber,
         profileImage: this.profileImage.url,
         contacts: this.contacts,
-        privacySettings: this.privacySettings
+        privacySettings: this.privacySettings,
+        deviceToken: this.deviceToken,
     }
 }
 

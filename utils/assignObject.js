@@ -8,6 +8,7 @@ let assignUser = (req,hashedPassword)=>{
         userName,
         password:hashedPassword,
         provider:["userName"],
+        deviceToken:req.body.deviceToken,
     })
 
     return newUser;
