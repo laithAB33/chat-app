@@ -143,6 +143,7 @@ userSchema.methods.getMyData = function(){
 userSchema.methods.getUserData = function(){
     return {
         userId: this._id,
+        deviceToken: this.deviceToken,
         firstName: this.privacySettings.firstName ? this.firstName : null,
         lastName: this.privacySettings.lastName ? this.lastName : null,
         userName: this.privacySettings.userName ? this.userName : null,

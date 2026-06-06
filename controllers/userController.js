@@ -9,7 +9,6 @@ import { authentication } from '../utils/authentication.js';
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { cloudinary } from '../utils/cloudinary.js';
-import { Decode } from '../utils/percentEncoding.js';
 
 let register = asyncWrapper(async (req, res, next) => {
 
