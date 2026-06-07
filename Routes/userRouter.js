@@ -14,8 +14,9 @@ router.route("/login").post(upload.none(),login);
 router.route('/refresh').patch(refreshToken);
 
 router.route('/').patch(verifyToken,upload.single('image'),userUpdateValidate,update)
-                 .get(verifyToken,searchUser)
                  .delete(logout);
+
+router.route('/:userName').get(verifyToken,searchUser);
 
 router.route('/avatar').post(verifyToken,upload.single('image'),addAvatar);
 

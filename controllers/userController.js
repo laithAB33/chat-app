@@ -212,17 +212,32 @@ let addAvatar = asyncWrapper(async(req,res,next)=>{
 
 let searchUser = asyncWrapper(async(req,res,next)=>{
 
-    let {userName} = req.query;
+    let {userName} = req.params;
 
     if(!userName) return next(new AppError("userNameis missing",400,"fail"));
+
+    if(!req.query.fields) return next(new AppError("fields query is required",400,"fail"));
 
     let user = await User.findOne({userName});
 
     if(!user) return next(new AppError("user with this userName not found",404,"fail"));
 
+    user = user.getUserData();
+
+    let requiredFields = req.query.fields.split(",");
+
+    let filteredUser = {};
+
+
+    requiredFields.forEach(field => {
+        if(user[field] !== undefined) {
+            filteredUser[field] = user[field];
+        }
+    });
+
     res.json({success:true, status:"success", message:"user info",
     data:{
-        user:user.getUserData(),
+        user:filteredUser,
     }});
 
 })
