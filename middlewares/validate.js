@@ -33,9 +33,13 @@ let userUpdateValidate = asyncWrapper(async(req,res,next)=>{
 
     if(data.userName && data.userName[0] == "#") return next(new AppError("userName must not start with #",400,"fail"));
 
-    let user = await User.findOne({userName:data.userName});
+    if(data.userName)
+    {
+        let user = await User.findOne({userName:data.userName});
 
-    if(user) return next(new AppError("user with this userName already exists",400,"fail"));
+        if(user) return next(new AppError("user with this userName already exists",400,"fail"));
+    }
+
 
     next();
 })

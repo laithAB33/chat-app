@@ -169,6 +169,7 @@ let update = asyncWrapper(async(req,res,next)=>{
     if(data.firstName) user.firstName = data.firstName;
     if(data.lastName) user.lastName = data.lastName;
     if(data.userName) user.userName = data.userName;
+    if(data.deviceToken) user.deviceToken = data.deviceToken;
 
     await user.save();
 
