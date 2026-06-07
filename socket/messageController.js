@@ -9,6 +9,8 @@ let  sendMessage = (socket)=> socketControllerWrapper(socket,async(data)=>{
 
     let {message,receiverId} = data;
 
+    console.log(socket.userId,data);
+
     let senderId = socket.userId, delivered = true;
 
     if(!message || !receiverId) throw new AppError("message and receiverId are required",400,"fail");
