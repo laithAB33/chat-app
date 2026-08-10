@@ -299,4 +299,69 @@ let logout = asyncWrapper(async(req,res,next)=>{
 
 })
 
-export {register, login,refreshToken,update,addAvatar,searchUser,changePrivacySettings,logout};
+let addToContacts = asyncWrapper(async(req,res,next)=>{
+
+    let {userName} = req.body;
+
+    if(!userName) return next(new AppError("userName is required",400,"fail"));
+
+    let userToAdd = await User.findOne({userName});
+
+    console.log(userToAdd);
+
+    if(!userToAdd) return next(new AppError("user not found",404,"fail"));
+
+    let user = await User.findById(req.userId);
+
+    if(!user) return next(new AppError("unauthorized",404,"fail"));
+
+    let isAlreadyInContacts = user.contacts.some(contact => contact.userId.toString() === userToAdd._id.toString());
+
+    if(isAlreadyInContacts) return next(new AppError("user is already in contacts",400,"fail"));
+
+    user.contacts.push({userId:userToAdd._id, userName:userToAdd.userName});
+
+    await user.save();
+
+    res.status(200).json({success:true, status:"success", message:"user added to contacts",
+    data:{
+        contacts:user.contacts
+    }})
+})
+
+let info = asyncWrapper(async(req,res,next)=>{
+
+    let user = await User.findById(req.userId);
+
+    if(!user) return next(new AppError("user not found",401,"fail"));
+
+    res.status(200).json({success:true, status:"success", message:"user info",
+    data:{
+        user:user.getMyData()
+    }})
+})
+
+let deleteContacts = asyncWrapper(async(req,res,next)=>{
+
+    let {userNames} = req.body;
+
+    if(!userNames || !Array.isArray(userNames) || userNames.length === 0) {
+        return next(new AppError("userNames must be a non-empty array", 400, "fail"));
+    }
+
+    let user = await User.findById(req.userId);
+
+    if(!user) return next(new AppError("user not found",401,"fail"));
+
+    user.contacts = user.contacts.filter(contact => !userNames.includes(contact.userName));
+
+    await user.save();
+
+    res.status(200).json({success:true, status:"success", message:"contacts deleted",
+    data:{
+        contacts:user.contacts
+    }})
+
+})
+
+export {register, login,refreshToken,update,addAvatar,searchUser,changePrivacySettings,logout,addToContacts,info,deleteContacts};

@@ -1,4 +1,5 @@
 import mongoose,{ Schema } from "mongoose";
+import { type } from "os";
 import validator from "validator";
 
 const {isEmail} = validator;
@@ -72,16 +73,18 @@ const userSchema = new Schema({
     contacts:{
     type:[
     {
-        user: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
+        },
+        userName:{
+            type:String,
         }
     }
     ],
     default:[],
 
     },
-
     privacySettings:{
         phoneNumber: {
             type: Boolean,
