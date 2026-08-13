@@ -33,11 +33,13 @@ let  sendMessage = (socket,user)=> socketControllerWrapper(socket,async(data)=>{
         message:privateMessage.message,
         sender:{
             id:senderId,
-            senderUserName:user.userName
+            senderUserName:user.userName,
+            deviceToken:user.deviceToken
         },      
         receiver:{
             id:receiverId,
-            receiverUserName:receiver.userName
+            receiverUserName:receiver.userName,
+            deviceToken:receiver.deviceToken
         },
         createdAt:privateMessage.createdAt,
         delivered
@@ -49,11 +51,13 @@ let  sendMessage = (socket,user)=> socketControllerWrapper(socket,async(data)=>{
         message:privateMessage.message,
                 sender:{
             id:senderId,
-            senderUserName:user.userName
+            senderUserName:user.userName,
+             deviceToken:user.deviceToken
         },   
         receiver:{
             id:receiverId,
-            receiverUserName:receiver.userName
+            receiverUserName:receiver.userName,
+            deviceToken:receiver.deviceToken
         },
         createdAt:privateMessage.createdAt,
     })
