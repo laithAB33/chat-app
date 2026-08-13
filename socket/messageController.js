@@ -5,7 +5,7 @@ import { PrivateMessage } from "../module/messageSchema.js";
 import {io} from "../main.js";
 import { redis } from "../utils/redis.js";
 
-let  sendMessage = (socket)=> socketControllerWrapper(socket,async(data)=>{
+let  sendMessage = (socket,user)=> socketControllerWrapper(socket,async(data)=>{
 
     let {message,receiverId} = data;
 
@@ -17,16 +17,28 @@ let  sendMessage = (socket)=> socketControllerWrapper(socket,async(data)=>{
 
     let receiverSocketId = await redis.get(`socketId:${receiverId}`);
 
+    let receiver = await User.findById(receiverId);
+
+    if(!receiver) throw new AppError("receiver not found",404,"fail");
+
     if(!receiverSocketId) delivered = false;
 
     let privateMessage = new PrivateMessage({senderId,receiverId,message,delivered});
     
     await privateMessage.save();
 
+    console.log(privateMessage);
+
     socket.emit("messageSent",{
         message:privateMessage.message,
-        senderId,
-        receiverId,
+        sender:{
+            id:senderId,
+            senderUserName:user.userName
+        },      
+        receiver:{
+            id:receiverId,
+            receiverUserName:receiver.userName
+        },
         createdAt:privateMessage.createdAt,
         delivered
     })
@@ -35,8 +47,14 @@ let  sendMessage = (socket)=> socketControllerWrapper(socket,async(data)=>{
 
     io.to(receiverSocketId).emit("newMessage",{
         message:privateMessage.message,
-        senderId,
-        receiverId,
+                sender:{
+            id:senderId,
+            senderUserName:user.userName
+        },   
+        receiver:{
+            id:receiverId,
+            receiverUserName:receiver.userName
+        },
         createdAt:privateMessage.createdAt,
     })
 })

@@ -10,7 +10,7 @@ let socketHandler = socketWrapper(async (socket) => {
 
     redis.set(`socketId:${socket.userId}`,socket.id);
   
-    socket.on('sendMessage', sendMessage(socket))
+    socket.on('sendMessage', sendMessage(socket,user))
 
     socket.on('disconnect',disconnect(socket,user));
     
