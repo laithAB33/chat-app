@@ -24,22 +24,22 @@ let  sendMessage = (socket,user)=> socketControllerWrapper(socket,async(data)=>{
     if(!receiverSocketId) delivered = false;
 
     let privateMessage = new PrivateMessage({senderId,receiverId,message,delivered});
-    
-    await privateMessage.save();
 
-    console.log(privateMessage);
+    await privateMessage.save();
 
     socket.emit("messageSent",{
         message:privateMessage.message,
         sender:{
             id:senderId,
             senderUserName:user.userName,
-            deviceToken:user.deviceToken
+            deviceToken:user.deviceToken,
+            profileImage:user.profileImage.url
         },      
         receiver:{
             id:receiverId,
             receiverUserName:receiver.userName,
-            deviceToken:receiver.deviceToken
+            deviceToken:receiver.deviceToken,
+            profileImage:receiver.profileImage.url
         },
         createdAt:privateMessage.createdAt,
         delivered
@@ -52,12 +52,14 @@ let  sendMessage = (socket,user)=> socketControllerWrapper(socket,async(data)=>{
                 sender:{
             id:senderId,
             senderUserName:user.userName,
-             deviceToken:user.deviceToken
+             deviceToken:user.deviceToken,
+             profileImage:user.profileImage.url
         },   
         receiver:{
             id:receiverId,
             receiverUserName:receiver.userName,
-            deviceToken:receiver.deviceToken
+            deviceToken:receiver.deviceToken,
+            profileImage:receiver.profileImage.url
         },
         createdAt:privateMessage.createdAt,
     })
