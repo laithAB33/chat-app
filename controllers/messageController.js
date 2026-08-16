@@ -30,7 +30,7 @@ let newMessages = asyncWrapper(async(req,res,next)=>{
     let newMessages = await PrivateMessage.find({
         receiverId:req.userId,
         delivered:false,
-    })
+    }).populate("senderId","userName").populate("receiverId","userName").sort({createdAt:-1});
 
     for(let message of newMessages)
     {
