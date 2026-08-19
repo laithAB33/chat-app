@@ -7,6 +7,8 @@ import { redis } from "../utils/redis.js";
 
 let disconnect = (socket,user) => socketControllerWrapper(socket,async()=>{
 
+    console.log(`user ${user.userName} disconnected`);
+
     await redis.del(`socketId:${socket.userId}`);
 
     user.lastSeen = new Date();
