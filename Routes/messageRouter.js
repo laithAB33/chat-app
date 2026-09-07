@@ -4,7 +4,7 @@ import { verifyToken } from "../middlewares/authentication.js";
 
 let router = express.Router();
 
-router.route("/new").get(verifyToken,newMessages);
+router.route("/new/:date").get(verifyToken,newMessages);
 
 router.route("/:userId").get(verifyToken,getAllMessages);
 

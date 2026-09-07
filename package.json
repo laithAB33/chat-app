@@ -27,6 +27,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "google-auth-library": "^10.6.2",
+    "iso-8601-regex": "^0.2.5",
     "jsonwebtoken": "^9.0.3",
     "libphonenumber-js": "^1.13.2",
     "mongodb": "^7.2.0",
