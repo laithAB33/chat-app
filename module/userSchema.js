@@ -123,6 +123,10 @@ const userSchema = new Schema({
     deviceToken:{
         type:String,
         default:null,
+    },
+    sessionsId:{
+        type:[String],
+        default:[],
     }
 }, {
     timestamps: true

@@ -9,7 +9,6 @@ let userUpdateValidate = asyncWrapper(async(req,res,next)=>{
 
     let data = req.body;
 
-
     if(data.phoneNumber)
     {
 

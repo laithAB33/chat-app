@@ -105,5 +105,3 @@ let confirmPrivateMessageDelivery = (socket,receiver)=> socketControllerWrapper(
 })
 
 export {sendPrivateMessage, confirmPrivateMessageDelivery};
-
-// task : send message and confirm delivery

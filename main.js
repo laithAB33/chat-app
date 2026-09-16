@@ -28,7 +28,6 @@ io = new Server(httpServer, {
 });
 
 await redis.connect();
-
 redis.on('error', (err) => console.error('Redis Error:', err));
 redis.on('connect', () => console.log('✅ Connected to Redis'));
 
@@ -66,8 +65,8 @@ app.use((req,res)=> {
     });
 })
 
-
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// add sId to redis and database when login and remove it when logout

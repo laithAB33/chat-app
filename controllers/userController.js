@@ -1,4 +1,3 @@
-
 import {asyncWrapper} from '../middlewares/asyncWrapper.js';
 import { User } from '../module/userSchema.js';
 import bcryptjs from "bcryptjs";
@@ -9,10 +8,12 @@ import { authentication } from '../utils/authentication.js';
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from '../utils/cloudinary.js';
 import { cloudinary } from '../utils/cloudinary.js';
+import { setTokenCookie, setDeviceCookie } from '../utils/setCookies.js';
+import { createSession, checkOldSession } from '../utils/Sessions.js';
 
 let register = asyncWrapper(async (req, res, next) => {
 
-    let {userName,password} = req.body;
+    let {userName,password} = req.body, deviceId = req.cookies?.deviceId;
 
     let checkOld = await User.findOne({userName});
 
@@ -24,38 +25,30 @@ let register = asyncWrapper(async (req, res, next) => {
 
     let user = assignUser(req,hashedPassword);
 
-    user.tokenVersion += 1;
+    await checkOldSession(req);
+
+    let session = await createSession(deviceId,user._id, req.headers['user-agent'], req.ip, 7 * 24 * 60 * 60 * 1000);
 
     await user.save();
 
-        let payload = {userId:user._id,userName:user.userName,tokenVersion:user.tokenVersion};
-        const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
-        const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
-            
-        res.cookie("refreshToken",refreshToken,{
-            maxAge:1000 * 60 * 60 *24 * 365 ,
-            httpOnly:true,
-            secure : process.env.NODE_ENV == 'production',
-            samesite: 'strict',
-        })
-    
-        res.cookie("accessToken",accessToken,{
-            maxAge:1000 * 60 * 30,
-            httpOnly:true,
-            secure : process.env.NODE_ENV == 'production',
-            samesite: 'strict',
-        })
-    
-        res.status(201).json({success: true ,status:"success",message: "user created successflly" ,
-        data:{
-            user:user.getMyData(),
-            accessToken,
-        }});
+    let payload = {userId:user._id,userName:user.userName,sid:session.sid};
+    const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
+    const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
+
+    setTokenCookie(res,accessToken,refreshToken);
+
+    setDeviceCookie(res,session.deviceId);
+
+    res.status(201).json({success: true ,status:"success",message: "user created successflly" ,
+    data:{
+        user:user.getMyData(),
+        accessToken,
+    }});
 })
 
 let login = asyncWrapper(async(req, res, next) => {
 
-    let {userName,password,deviceToken} = req.body;
+    let {userName,password,deviceToken} = req.body, deviceId = req.cookies.deviceId;
 
     let oldUser = await User.findOne({userName,provider:{$in:["userName"]}});
 
@@ -65,30 +58,21 @@ let login = asyncWrapper(async(req, res, next) => {
 
     await authentication(password,oldUser.password);
 
-    oldUser.tokenVersion += 1;
     oldUser.deviceToken = deviceToken;
 
-    await oldUser.save();
+    await checkOldSession(req);
 
-    let payload = {userId:oldUser._id,userName:oldUser.userName,tokenVersion:oldUser.tokenVersion};
+    let session = await createSession(deviceId,oldUser._id, req.headers['user-agent'], req.ip,3 * 60 * 60 * 1000);
+
+    let payload = {userId:oldUser._id,userName:oldUser.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
     await oldUser.save();
 
-    res.cookie("refreshToken",refreshToken,{
-        maxAge:1000 * 60 * 60 *24 * 365 ,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setTokenCookie(res,accessToken,refreshToken);
 
-    res.cookie("accessToken",accessToken,{
-        maxAge:1000 * 60 * 30,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setDeviceCookie(res,session.deviceId);
 
     res.status(200).json({success: true ,status:"success",message: "user logged in successflly" ,
     data:{
@@ -103,7 +87,7 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
     if(!req.cookies?.refreshToken)
         return next(new AppError("Unauthorized. Please login to access this resource",401,"fail"));
     
-    let oldRefreshToken = req.cookies.refreshToken;
+    let oldRefreshToken = req.cookies.refreshToken, deviceId = req.cookies.deviceId;
 
     let decoded = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
@@ -112,33 +96,23 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
     if(!foundUser)
         return next(new AppError("Unauthorized",401,"fail"));
 
-    if(foundUser.tokenVersion !== decoded.tokenVersion) return next(new AppError("Unauthorized expired token",401,"fail"));
+    await checkOldSession(req);
 
     req.userID = decoded.userId;
     req.email = decoded.email;
     req.userName = decoded.userName;
 
-    foundUser.tokenVersion += 1;
-
     await foundUser.save();
 
-    let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName,tokenVersion:foundUser.tokenVersion};
+    let session = await createSession(deviceId,foundUser._id, req.headers['user-agent'], req.ip, 7 * 24 * 60 * 60 * 1000);
+
+    let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
-    res.cookie("refreshToken",refreshToken,{
-        maxAge:1000 * 60 * 60 *24 * 365 ,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setTokenCookie(res,accessToken,refreshToken);
 
-    res.cookie("accessToken",accessToken,{
-        maxAge:1000 * 60 * 30,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setDeviceCookie(res,session.deviceId);
 
     res.status(200).json({success:true,status:"success",message:"the session is updated successfully",
     data:{
@@ -280,20 +254,15 @@ let logout = asyncWrapper(async(req,res,next)=>{
 
         let decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-        if(!decoded) return next(new AppError("invalid refresh token",400,"fail"));
+        if(!decoded) return next(new AppError("unauthorized",401,"fail"));
 
         let user = await User.findById(decoded.userId);
 
-        if(!user) return next(new AppError("user not found",400,"fail"));
-
-        if(user.tokenVersion !== decoded.tokenVersion) return next(new AppError("Unauthorized expired token",401,"fail"));
-
-        user.tokenVersion += 1;
+        if(!user) return next(new AppError("unauthorized",401,"fail"));
 
         await user.save();
 
-    // res.clearCookie("refreshToken",{httpOnly:true})
-    // res.clearCookie("accessToken",{httpOnly:true})
+        await session.delete({sid:decoded.sid});
 
     res.status(200).json({success:true, status:"success", message:"you logged out", data:null})
 

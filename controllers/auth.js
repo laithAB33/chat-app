@@ -4,7 +4,9 @@ import {AppError} from "../utils/appError.js";
 import {asyncWrapper, socketWrapper} from "../middlewares/asyncWrapper.js";
 import jwt from "jsonwebtoken";
 import { extractTokenFromSocket } from "../utils/extractToken.js";
-
+import { setTokenCookie, setDeviceCookie } from "../utils/setCookies.js";
+import { Session } from "../module/sessionSchema.js";
+import {createSession, checkOldSession } from "../utils/Sessions.js";
 
 let googleAuth = asyncWrapper(async(req, res,next) => {
     
@@ -26,27 +28,19 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
 
     user.deviceToken = deviceToken;
 
-    user.tokenVersion += 1;
+    await checkOldSession(req);
 
     await user.save();
 
-    let payload = {email:user.email,userId:user._id,userName:user.userName,tokenVersion:user.tokenVersion};
+    await createSession(user._id, req.headers['user-agent'], req.ip, 10 * 1000);
+
+    let payload = {email:user.email,userId:user._id,userName:user.userName};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
-    res.cookie("refreshToken",refreshToken,{
-        maxAge:1000 * 60 * 60 *24 * 365 ,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setTokenCookie(res,accessToken,refreshToken);
 
-    res.cookie("accessToken",accessToken,{
-        maxAge:1000 * 60 * 30,
-        httpOnly:true,
-        secure : process.env.NODE_ENV == 'production',
-        samesite: 'strict',
-    })
+    setDeviceCookie(res,user._id);
 
     res.status(200).json({
     success: true ,status:"success",message: "user logged in successflly" ,
