@@ -27,7 +27,7 @@ let register = asyncWrapper(async (req, res, next) => {
 
     await checkOldSession(req);
 
-    let session = await createSession(deviceId,user._id, req.headers['user-agent'], req.ip, 7 * 24 * 60 * 60 * 1000);
+    let session = await createSession(deviceId,user._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
 
     await user.save();
 
@@ -62,7 +62,7 @@ let login = asyncWrapper(async(req, res, next) => {
 
     await checkOldSession(req);
 
-    let session = await createSession(deviceId,oldUser._id, req.headers['user-agent'], req.ip,3 * 60 * 60 * 1000);
+    let session = await createSession(deviceId,oldUser._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
 
     let payload = {userId:oldUser._id,userName:oldUser.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
@@ -104,7 +104,7 @@ let refreshToken = asyncWrapper(async(req,res,next)=>{
 
     await foundUser.save();
 
-    let session = await createSession(deviceId,foundUser._id, req.headers['user-agent'], req.ip, 7 * 24 * 60 * 60 * 1000);
+    let session = await createSession(deviceId,foundUser._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
 
     let payload = {email:foundUser.email,userId:foundUser._id,userName:foundUser.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");

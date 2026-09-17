@@ -32,9 +32,9 @@ let googleAuth = asyncWrapper(async(req, res,next) => {
 
     await user.save();
 
-    await createSession(user._id, req.headers['user-agent'], req.ip, 10 * 1000);
+    await createSession(user._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
 
-    let payload = {email:user.email,userId:user._id,userName:user.userName};
+    let payload = {email:user.email,userId:user._id,userName:user.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 

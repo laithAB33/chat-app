@@ -69,4 +69,3 @@ httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// add sId to redis and database when login and remove it when logout
