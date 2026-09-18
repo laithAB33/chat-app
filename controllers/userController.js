@@ -25,11 +25,13 @@ let register = asyncWrapper(async (req, res, next) => {
 
     let user = assignUser(req,hashedPassword);
 
+    await user.save();
+
+    req.userId = user._id;
+
     await checkOldSession(req);
 
     let session = await createSession(deviceId,user._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
-
-    await user.save();
 
     let payload = {userId:user._id,userName:user.userName,sid:session.sid};
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
@@ -60,7 +62,13 @@ let login = asyncWrapper(async(req, res, next) => {
 
     oldUser.deviceToken = deviceToken;
 
+    await oldUser.save();
+
+    req.userId = oldUser._id;
+
     await checkOldSession(req);
+
+    console.log(oldUser);
 
     let session = await createSession(deviceId,oldUser._id, req.headers['user-agent'], req.ip, process.env.SESSION_EXPIRE_TIME);
 
@@ -68,7 +76,7 @@ let login = asyncWrapper(async(req, res, next) => {
     const accessToken = genrateToken(payload,"ACCESS_TOKEN_SECRET");
     const refreshToken = genrateToken(payload,"REFRESH_TOKEN_SECRET");
 
-    await oldUser.save();
+
 
     setTokenCookie(res,accessToken,refreshToken);
 

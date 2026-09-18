@@ -63,6 +63,7 @@ let verifyToken = async(req,res,next)=>{
     req.userId = decoded.userId;
     req.email = decoded.email;
     req.userName = decoded.userName;
+    req.sid = decoded.sid;
     next();
 }
 

@@ -35,8 +35,9 @@ let checkOldSession = async function (req) {
 
   if(deviceId)
   {
-
-    let session = await Session.findOneAndDelete({ deviceId, isRevoked: false });
+    console.log(req.userId);
+    
+    let session = await Session.findOneAndDelete({ deviceId,userId: req.userId, isRevoked: false });
 
     if(session) await redis.del(`session:${session.sid}`);
 

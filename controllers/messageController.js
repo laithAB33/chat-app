@@ -30,21 +30,10 @@ let getAllMessages = asyncWrapper(async(req,res,next)=>{
 
 let newMessages = asyncWrapper(async(req,res,next)=>{
 
-    let date = req.params.date;
-
-    if(!date) return next(new AppError("date is required",400,"fail"));
-
-
-    if(!validator.isISO8601(date)) return next(new AppError("date must be in ISO 8601 format",400,"fail"));
-
-
-    date = new Date(date);
-
-    if(isNaN(date.getTime())) return next(new AppError("Invalid date",400,"fail"));
-    
-    let newMessages = await PrivateMessage.find({
-        receiverId:req.userId,
-        createdAt:{$gt:date}
+ 
+     let newMessages = await PrivateMessage.find({
+     receiverId:req.userId,
+     delivered:false,
     }).populate("senderId","userName").populate("receiverId","userName").sort({createdAt:-1});
 
     for(let message of newMessages)

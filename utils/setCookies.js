@@ -19,7 +19,6 @@ let setTokenCookie = (res,accessToken,refreshToken) => {
 let setDeviceCookie = (res,deviceId) => {
 
     res.cookie("deviceId",deviceId,{
-        maxAge:1000 * 60 * 60 *24 * 365 ,
         httpOnly:true,
         secure : process.env.NODE_ENV == 'production',
         samesite: 'strict',
